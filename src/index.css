@@ -8,35 +8,57 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Caribbean Ocean Blue Theme */
+    --background: 210 100% 97%;
+    --foreground: 210 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Ocean Deep Blue Primary */
+    --primary: 205 87% 24%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 205 87% 30%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Sunset Orange Accent */
+    --accent: 25 95% 60%;
+    --accent-foreground: 0 0% 100%;
+    --accent-hover: 25 95% 65%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Emerald Green Secondary */
+    --secondary: 160 84% 30%;
+    --secondary-foreground: 0 0% 100%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Soft Caribbean Muted */
+    --muted: 210 40% 95%;
+    --muted-foreground: 210 15% 45%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 20% 88%;
+    --input: 210 20% 92%;
+    --ring: 205 87% 24%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
+
+    /* Caribbean Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(205 87% 24%), hsl(200 100% 40%), hsl(25 95% 60%));
+    --gradient-ocean: linear-gradient(180deg, hsl(205 87% 24%), hsl(200 90% 35%));
+    --gradient-sunset: linear-gradient(135deg, hsl(25 95% 60%), hsl(35 90% 65%));
+    --gradient-emerald: linear-gradient(135deg, hsl(160 84% 30%), hsl(160 80% 40%));
+    
+    /* Caribbean Shadows */
+    --shadow-caribbean: 0 10px 30px -5px hsl(205 87% 24% / 0.3);
+    --shadow-glow: 0 0 40px hsl(25 95% 60% / 0.4);
+    --shadow-soft: 0 4px 20px hsl(210 20% 15% / 0.1);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
