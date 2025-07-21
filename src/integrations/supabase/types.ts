@@ -38,6 +38,77 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          parent_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          parent_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crypto_tokens: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          last_reward_claim: string | null
+          rewards_earned: number | null
+          staked_amount: number | null
+          token_type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          last_reward_claim?: string | null
+          rewards_earned?: number | null
+          staked_amount?: number | null
+          token_type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          last_reward_claim?: string | null
+          rewards_earned?: number | null
+          staked_amount?: number | null
+          token_type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       crypto_wallets: {
         Row: {
           address: string
@@ -198,6 +269,51 @@ export type Database = {
           },
         ]
       }
+      order_items_new: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string | null
+          price: number
+          product_id: string | null
+          quantity: number
+          total: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          price: number
+          product_id?: string | null
+          quantity: number
+          total: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          price?: number
+          product_id?: string | null
+          quantity?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_new_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_new"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_new_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_new"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string | null
@@ -244,6 +360,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      orders_new: {
+        Row: {
+          billing_address: Json | null
+          created_at: string | null
+          currency: string
+          id: string
+          notes: string | null
+          payment_method: string | null
+          payment_status: string | null
+          shipping_address: Json
+          shopify_order_id: string | null
+          status: string
+          total: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          billing_address?: Json | null
+          created_at?: string | null
+          currency?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping_address: Json
+          shopify_order_id?: string | null
+          status?: string
+          total: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          billing_address?: Json | null
+          created_at?: string | null
+          currency?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          shipping_address?: Json
+          shopify_order_id?: string | null
+          status?: string
+          total?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       products: {
         Row: {
@@ -306,6 +476,113 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      products_new: {
+        Row: {
+          category_id: string | null
+          country_origin: string | null
+          created_at: string | null
+          currency: string
+          description: string | null
+          id: string
+          images: string[]
+          name: string
+          price: number
+          rating: number | null
+          reviews_count: number | null
+          shipping_countries: string[] | null
+          shopify_product_id: string | null
+          status: string
+          stock: number
+          updated_at: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          country_origin?: string | null
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          name: string
+          price: number
+          rating?: number | null
+          reviews_count?: number | null
+          shipping_countries?: string[] | null
+          shopify_product_id?: string | null
+          status?: string
+          stock?: number
+          updated_at?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          country_origin?: string | null
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          name?: string
+          price?: number
+          rating?: number | null
+          reviews_count?: number | null
+          shipping_countries?: string[] | null
+          shopify_product_id?: string | null
+          status?: string
+          stock?: number
+          updated_at?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_new_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          address: Json | null
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          role: string
+          shopify_customer_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: Json | null
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: string
+          shopify_customer_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: Json | null
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          role?: string
+          shopify_customer_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       profit_transactions: {
         Row: {
@@ -377,6 +654,44 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          product_id: string | null
+          rating: number
+          user_id: string | null
+          verified_purchase: boolean | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          rating: number
+          user_id?: string | null
+          verified_purchase?: boolean | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          rating?: number
+          user_id?: string | null
+          verified_purchase?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_new"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roles: {
         Row: {
@@ -529,6 +844,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          id: string
+          points_earned: number | null
+          unlocked_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          id?: string
+          points_earned?: number | null
+          unlocked_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          id?: string
+          points_earned?: number | null
+          unlocked_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       user_consents: {
         Row: {
