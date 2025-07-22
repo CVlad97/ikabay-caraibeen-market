@@ -1,0 +1,84 @@
+<link rel="stylesheet" href="{{ 'section-header.css' | asset_url }}" media="print" onload="this.media='all'">
+
+<header class="header">
+  <div class="header__content">
+    <div class="header__logo">
+      <a href="/" class="header__logo-link">
+        {% if section.settings.logo != blank %}
+          <img src="{{ section.settings.logo | image_url }}" alt="{{ shop.name }}" class="header__logo-image" width="{{ section.settings.logo_width }}">
+        {% else %}
+          {{ shop.name }}
+        {% endif %}
+      </a>
+    </div>
+    
+    <div class="header__nav">
+      <nav class="header__menu">
+        <ul class="header__menu-list">
+          {% for link in section.settings.menu.links %}
+            <li class="header__menu-item">
+              <a href="{{ link.url }}" class="header__menu-link">{{ link.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      </nav>
+      
+      <div class="header__icons">
+        <a href="{{ routes.search_url }}" class="header__icon-link">
+          {% render 'icon-search' %}
+          <span class="visually-hidden">{{ 'general.search.search' | t }}</span>
+        </a>
+        
+        <a href="{{ routes.account_url }}" class="header__icon-link">
+          {% render 'icon-account' %}
+          <span class="visually-hidden">{{ 'customer.account.title' | t }}</span>
+        </a>
+        
+        <a href="{{ routes.cart_url }}" class="header__icon-link header__icon-cart">
+          {% render 'icon-cart' %}
+          <span class="visually-hidden">{{ 'general.cart.title' | t }}</span>
+          <div class="header__cart-count">
+            {%- if cart.item_count > 0 -%}
+              <span>{{ cart.item_count }}</span>
+            {%- endif -%}
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 250,
+      "step": 10,
+      "default": 100,
+      "unit": "px",
+      "label": "Logo width"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "default": "main-menu",
+      "label": "Menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_search",
+      "default": true,
+      "label": "Show search"
+    }
+  ]
+}
+{% endschema %}

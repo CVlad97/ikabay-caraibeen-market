@@ -1,0 +1,65 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Ikabay Theme",
+    "theme_version": "1.0.0",
+    "theme_author": "Ikabay",
+    "theme_documentation_url": "",
+    "theme_support_url": ""
+  },
+  {
+    "name": "Colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "color_primary",
+        "label": "Primary color",
+        "default": "#0f172a"
+      },
+      {
+        "type": "color",
+        "id": "color_secondary",
+        "label": "Secondary color", 
+        "default": "#f8fafc"
+      },
+      {
+        "type": "color",
+        "id": "color_accent",
+        "label": "Accent color",
+        "default": "#3b82f6"
+      }
+    ]
+  },
+  {
+    "name": "Typography",
+    "settings": [
+      {
+        "type": "font_picker",
+        "id": "type_header_font",
+        "label": "Heading font",
+        "default": "assistant_n4"
+      },
+      {
+        "type": "font_picker", 
+        "id": "type_body_font",
+        "label": "Body font",
+        "default": "assistant_n4"
+      }
+    ]
+  },
+  {
+    "name": "Layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "layout_max_width",
+        "label": "Page max width",
+        "min": 1000,
+        "max": 1400,
+        "step": 50,
+        "default": 1200,
+        "unit": "px"
+      }
+    ]
+  }
+]

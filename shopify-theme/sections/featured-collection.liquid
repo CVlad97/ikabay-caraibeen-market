@@ -1,0 +1,163 @@
+<div class="featured-collection">
+  <div class="featured-collection__header">
+    {% if section.settings.title != blank %}
+      <h2 class="featured-collection__title">{{ section.settings.title }}</h2>
+    {% endif %}
+    
+    {% if section.settings.description != blank %}
+      <div class="featured-collection__description">{{ section.settings.description }}</div>
+    {% endif %}
+  </div>
+  
+  <div class="product-grid">
+    {% assign collection = collections[section.settings.collection] %}
+    {% assign product_limit = section.settings.products_to_show %}
+    
+    {% for product in collection.products limit: product_limit %}
+      <div class="product-card">
+        <a href="{{ product.url }}" class="product-card__link">
+          {% if product.featured_image != blank %}
+            <img
+              src="{{ product.featured_image | img_url: '400x' }}"
+              alt="{{ product.featured_image.alt | escape }}"
+              loading="lazy"
+              class="product-card__image"
+            >
+          {% else %}
+            {{ 'product-1' | placeholder_svg_tag: 'product-card__image placeholder' }}
+          {% endif %}
+          
+          <div class="product-card__content">
+            <h3 class="product-card__title">{{ product.title }}</h3>
+            
+            <div class="product-card__price">
+              {% if product.compare_at_price > product.price %}
+                <span class="product-card__price-original">{{ product.compare_at_price | money }}</span>
+                <span class="product-card__price-sale">{{ product.price | money }}</span>
+              {% else %}
+                <span>{{ product.price | money }}</span>
+              {% endif %}
+            </div>
+            
+            {% if section.settings.show_description %}
+              <div class="product-card__description">
+                {{ product.description | strip_html | truncatewords: 15 }}
+              </div>
+            {% endif %}
+            
+            {% if section.settings.show_button %}
+              <button class="button button--primary product-card__button">
+                {% if product.available %}
+                  {{ 'products.product.add_to_cart' | t }}
+                {% else %}
+                  {{ 'products.product.sold_out' | t }}
+                {% endif %}
+              </button>
+            {% endif %}
+          </div>
+        </a>
+      </div>
+    {% else %}
+      <div class="featured-collection__empty">
+        <p>{{ 'collections.general.no_matches' | t }}</p>
+      </div>
+    {% endfor %}
+  </div>
+  
+  {% if section.settings.show_view_all and section.settings.collection != blank %}
+    <div class="featured-collection__view-all">
+      <a href="{{ collections[section.settings.collection].url }}" class="button button--secondary">
+        {{ 'collections.general.view_all' | t }}
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.featured-collection {
+  padding: 4rem 0;
+}
+
+.featured-collection__header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.featured-collection__title {
+  font-size: 2.4rem;
+  margin-bottom: 1rem;
+}
+
+.featured-collection__description {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.featured-collection__view-all {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.featured-collection__empty {
+  padding: 3rem;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+</style>
+
+{% schema %}
+{
+  "name": "Featured Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "default": "Featured Collection",
+      "label": "Title"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4,
+      "label": "Number of products to show"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "default": true,
+      "label": "Show product description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "default": true,
+      "label": "Show add to cart button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "default": true,
+      "label": "Show 'View all' button"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured Collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

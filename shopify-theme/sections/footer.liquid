@@ -1,0 +1,156 @@
+<footer class="footer">
+  <div class="footer__content">
+    <div class="footer__column">
+      <h3 class="footer__title">{{ section.settings.column1_title }}</h3>
+      {% if section.settings.logo != blank %}
+        <img src="{{ section.settings.logo | image_url }}" alt="{{ shop.name }}" width="150">
+      {% endif %}
+      <div class="footer__text">{{ section.settings.column1_text }}</div>
+    </div>
+    
+    <div class="footer__column">
+      <h3 class="footer__title">{{ section.settings.column2_title }}</h3>
+      {% if section.settings.footer_menu != blank %}
+        <ul class="footer__list">
+          {% for link in section.settings.footer_menu.links %}
+            <li class="footer__list-item">
+              <a href="{{ link.url }}" class="footer__link">{{ link.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+    
+    <div class="footer__column">
+      <h3 class="footer__title">{{ section.settings.column3_title }}</h3>
+      <ul class="footer__list">
+        <li class="footer__list-item">
+          <a href="{{ routes.account_url }}" class="footer__link">{{ 'customer.account.title' | t }}</a>
+        </li>
+        <li class="footer__list-item">
+          <a href="{{ routes.account_login_url }}" class="footer__link">{{ 'customer.log_in' | t }}</a>
+        </li>
+        <li class="footer__list-item">
+          <a href="{{ routes.account_register_url }}" class="footer__link">{{ 'customer.register.title' | t }}</a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="footer__column">
+      <h3 class="footer__title">{{ section.settings.column4_title }}</h3>
+      <div class="footer__text">{{ section.settings.contact_info }}</div>
+      
+      {% if section.settings.show_social %}
+        <div class="footer__social">
+          {%- if settings.social_facebook_link != blank -%}
+            <a href="{{ settings.social_facebook_link }}" class="footer__social-link">
+              {% render 'icon-facebook' %}
+              <span class="visually-hidden">Facebook</span>
+            </a>
+          {%- endif -%}
+          
+          {%- if settings.social_instagram_link != blank -%}
+            <a href="{{ settings.social_instagram_link }}" class="footer__social-link">
+              {% render 'icon-instagram' %}
+              <span class="visually-hidden">Instagram</span>
+            </a>
+          {%- endif -%}
+          
+          {%- if settings.social_twitter_link != blank -%}
+            <a href="{{ settings.social_twitter_link }}" class="footer__social-link">
+              {% render 'icon-twitter' %}
+              <span class="visually-hidden">Twitter</span>
+            </a>
+          {%- endif -%}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="footer__bottom">
+    <div class="footer__copyright">
+      &copy; {{ 'now' | date: '%Y' }} {{ shop.name }}. {{ section.settings.copyright_text }}
+    </div>
+    
+    {% if section.settings.show_payment_icons %}
+      <div class="footer__payment">
+        {% for type in shop.enabled_payment_types %}
+          {{ type | payment_type_svg_tag: class: 'icon icon--payment' }}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image"
+    },
+    {
+      "type": "text",
+      "id": "column1_title",
+      "default": "About",
+      "label": "Column 1 title"
+    },
+    {
+      "type": "richtext",
+      "id": "column1_text",
+      "default": "<p>Use this text to share information about your brand with your customers.</p>",
+      "label": "Column 1 text"
+    },
+    {
+      "type": "text",
+      "id": "column2_title",
+      "default": "Links",
+      "label": "Column 2 title"
+    },
+    {
+      "type": "link_list",
+      "id": "footer_menu",
+      "default": "footer",
+      "label": "Footer menu"
+    },
+    {
+      "type": "text",
+      "id": "column3_title",
+      "default": "Customer",
+      "label": "Column 3 title"
+    },
+    {
+      "type": "text",
+      "id": "column4_title",
+      "default": "Contact",
+      "label": "Column 4 title"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_info",
+      "default": "<p>123 Fake St.<br>Toronto, Canada</p><p>example@example.com<br>+1 555 555 5555</p>",
+      "label": "Contact information"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_social",
+      "default": true,
+      "label": "Show social icons"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "default": "All rights reserved.",
+      "label": "Copyright text"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_payment_icons",
+      "default": true,
+      "label": "Show payment icons"
+    }
+  ]
+}
+{% endschema %}

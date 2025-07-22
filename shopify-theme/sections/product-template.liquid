@@ -1,0 +1,535 @@
+<div class="product-template">
+  <div class="product-template__container">
+    <div class="product-template__media">
+      <div class="product-template__gallery">
+        {% for media in product.media %}
+          <div class="product-template__media-item" data-media-id="{{ media.id }}">
+            {% case media.media_type %}
+              {% when 'image' %}
+                <img
+                  src="{{ media | img_url: '600x' }}"
+                  alt="{{ media.alt | escape }}"
+                  loading="lazy"
+                  class="product-template__image"
+                  data-main-image
+                >
+              {% when 'external_video' %}
+                {{ media | external_video_tag }}
+              {% when 'video' %}
+                {{ media | video_tag: controls: true }}
+              {% when 'model' %}
+                {{ media | model_viewer_tag }}
+            {% endcase %}
+          </div>
+        {% endfor %}
+      </div>
+      
+      {% if product.media.size > 1 %}
+        <div class="product-template__thumbnails">
+          {% for media in product.media %}
+            <div class="product-template__thumbnail" data-thumbnail-id="{{ media.id }}">
+              <img
+                src="{{ media | img_url: '100x' }}"
+                alt="{{ media.alt | escape }}"
+                loading="lazy"
+              >
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    
+    <div class="product-template__details">
+      <h1 class="product-template__title">{{ product.title }}</h1>
+      
+      <div class="product-template__vendor">{{ product.vendor }}</div>
+      
+      <div class="product-template__price">
+        {% if product.compare_at_price > product.price %}
+          <span class="product-template__price-original">{{ product.compare_at_price | money }}</span>
+          <span class="product-template__price-sale">{{ product.price | money }}</span>
+          <span class="product-template__discount">
+            Save {{ product.compare_at_price | minus: product.price | money }}
+          </span>
+        {% else %}
+          <span>{{ product.price | money }}</span>
+        {% endif %}
+      </div>
+      
+      {% if section.settings.show_description %}
+        <div class="product-template__description">
+          {{ product.description }}
+        </div>
+      {% endif %}
+      
+      {% form 'product', product %}
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        
+        {% if product.has_only_default_variant == false %}
+          <div class="product-template__variants">
+            {% for option in product.options_with_values %}
+              <div class="product-template__option">
+                <label for="Option-{{ forloop.index }}">{{ option.name }}</label>
+                
+                <div class="product-template__option-values">
+                  {% for value in option.values %}
+                    <input
+                      type="radio"
+                      id="Option{{ forloop.index }}-{{ value | escape }}"
+                      name="options[{{ option.name | escape }}]"
+                      value="{{ value | escape }}"
+                      {% if option.selected_value == value %}checked{% endif %}
+                    >
+                    <label for="Option{{ forloop.index }}-{{ value | escape }}">{{ value }}</label>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        
+        <div class="product-template__quantity">
+          <label for="Quantity">Quantity</label>
+          <input
+            type="number"
+            id="Quantity"
+            name="quantity"
+            value="1"
+            min="1"
+            aria-label="{{ 'products.product.quantity.label' | t }}"
+          >
+        </div>
+        
+        <div class="product-template__buttons">
+          <button
+            type="submit"
+            name="add"
+            class="button button--primary product-template__add-to-cart"
+            {% if product.available == false %}disabled{% endif %}
+          >
+            {% if product.available %}
+              {{ 'products.product.add_to_cart' | t }}
+            {% else %}
+              {{ 'products.product.sold_out' | t }}
+            {% endif %}
+          </button>
+          
+          {% if section.settings.show_buy_now and product.available %}
+            <button
+              type="submit"
+              name="checkout"
+              class="button product-template__buy-now"
+            >
+              {{ 'products.product.buy_now' | t }}
+            </button>
+          {% endif %}
+        </div>
+      {% endform %}
+      
+      {% if section.settings.show_share_buttons %}
+        <div class="product-template__share">
+          <span>{{ 'products.product.share' | t }}</span>
+          <div class="product-template__share-buttons">
+            <a href="https://www.facebook.com/sharer.php?u={{ shop.url | append: product.url }}" target="_blank" rel="noopener">
+              {% render 'icon-facebook' %}
+            </a>
+            <a href="https://twitter.com/intent/tweet?text={{ product.title | url_encode }}&url={{ shop.url | append: product.url | url_encode }}" target="_blank" rel="noopener">
+              {% render 'icon-twitter' %}
+            </a>
+            <a href="https://pinterest.com/pin/create/button/?url={{ shop.url | append: product.url | url_encode }}&media={{ product.featured_image | img_url: 'large' | url_encode }}&description={{ product.title | url_encode }}" target="_blank" rel="noopener">
+              {% render 'icon-pinterest' %}
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  {% if section.settings.show_tabs %}
+    <div class="product-template__tabs">
+      <div class="product-template__tab-buttons">
+        <button class="product-template__tab-button active" data-tab="description">
+          {{ 'products.product.description' | t }}
+        </button>
+        
+        <button class="product-template__tab-button" data-tab="details">
+          {{ 'products.product.details' | t }}
+        </button>
+        
+        <button class="product-template__tab-button" data-tab="shipping">
+          {{ 'products.product.shipping' | t }}
+        </button>
+      </div>
+      
+      <div class="product-template__tab-content active" data-tab-content="description">
+        {{ product.description }}
+      </div>
+      
+      <div class="product-template__tab-content" data-tab-content="details">
+        <h3>Product Details</h3>
+        <ul>
+          <li><strong>Vendor:</strong> {{ product.vendor }}</li>
+          <li><strong>Type:</strong> {{ product.type }}</li>
+          <li><strong>SKU:</strong> {{ product.selected_or_first_available_variant.sku }}</li>
+          
+          {% for option in product.options_with_values %}
+            <li><strong>{{ option.name }}:</strong> {{ option.values | join: ', ' }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      
+      <div class="product-template__tab-content" data-tab-content="shipping">
+        <h3>Shipping Information</h3>
+        {{ section.settings.shipping_text }}
+      </div>
+    </div>
+  {% endif %}
+  
+  {% if section.settings.show_related_products %}
+    <div class="product-template__related">
+      <h2 class="product-template__related-title">{{ section.settings.related_products_title }}</h2>
+      
+      <div class="product-grid">
+        {% assign max_related = section.settings.related_products_count | default: 4 %}
+        {% assign related_products = product.collections.last.products | where: "id", "!=" , product.id | limit: max_related %}
+        
+        {% for related_product in related_products %}
+          <div class="product-card">
+            <a href="{{ related_product.url }}" class="product-card__link">
+              {% if related_product.featured_image != blank %}
+                <img
+                  src="{{ related_product.featured_image | img_url: '400x' }}"
+                  alt="{{ related_product.featured_image.alt | escape }}"
+                  loading="lazy"
+                  class="product-card__image"
+                >
+              {% else %}
+                {{ 'product-1' | placeholder_svg_tag: 'product-card__image placeholder' }}
+              {% endif %}
+              
+              <div class="product-card__content">
+                <h3 class="product-card__title">{{ related_product.title }}</h3>
+                
+                <div class="product-card__price">
+                  {% if related_product.compare_at_price > related_product.price %}
+                    <span class="product-card__price-original">{{ related_product.compare_at_price | money }}</span>
+                    <span class="product-card__price-sale">{{ related_product.price | money }}</span>
+                  {% else %}
+                    <span>{{ related_product.price | money }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.product-template {
+  padding: 4rem 0;
+}
+
+.product-template__container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+@media screen and (min-width: 750px) {
+  .product-template__container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.product-template__gallery {
+  margin-bottom: 1.5rem;
+}
+
+.product-template__image {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.product-template__thumbnails {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.product-template__thumbnail {
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.product-template__thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-template__title {
+  font-size: 2.4rem;
+  margin-bottom: 1rem;
+}
+
+.product-template__vendor {
+  color: hsl(var(--color-base-text) / 0.7);
+  margin-bottom: 1.5rem;
+}
+
+.product-template__price {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.product-template__price-original {
+  text-decoration: line-through;
+  color: hsl(var(--color-base-text) / 0.7);
+  margin-right: 1rem;
+}
+
+.product-template__price-sale {
+  color: #e21;
+}
+
+.product-template__discount {
+  display: block;
+  font-size: 1.4rem;
+  color: #e21;
+  margin-top: 0.5rem;
+}
+
+.product-template__description {
+  margin-bottom: 2rem;
+}
+
+.product-template__option {
+  margin-bottom: 1.5rem;
+}
+
+.product-template__option label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.product-template__option-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.product-template__quantity {
+  margin-bottom: 2rem;
+}
+
+.product-template__quantity label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.product-template__quantity input {
+  width: 100px;
+  padding: 0.8rem;
+  border: 1px solid hsl(var(--color-base-text) / 0.2);
+  border-radius: var(--inputs-radius);
+}
+
+.product-template__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.product-template__add-to-cart,
+.product-template__buy-now {
+  flex: 1;
+  min-width: 150px;
+}
+
+.product-template__share {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid hsl(var(--color-base-text) / 0.1);
+}
+
+.product-template__share-buttons {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.product-template__share-buttons a {
+  color: hsl(var(--color-base-text) / 0.8);
+}
+
+.product-template__tabs {
+  margin-top: 4rem;
+  border-top: 1px solid hsl(var(--color-base-text) / 0.1);
+  padding-top: 3rem;
+}
+
+.product-template__tab-buttons {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid hsl(var(--color-base-text) / 0.1);
+}
+
+.product-template__tab-button {
+  background: none;
+  border: none;
+  padding: 1rem 0;
+  font-size: 1.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+}
+
+.product-template__tab-button.active {
+  color: hsl(var(--color-base-accent-1));
+}
+
+.product-template__tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: hsl(var(--color-base-accent-1));
+}
+
+.product-template__tab-content {
+  display: none;
+}
+
+.product-template__tab-content.active {
+  display: block;
+}
+
+.product-template__related {
+  margin-top: 6rem;
+}
+
+.product-template__related-title {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.product-template__tab-button');
+    const tabContents = document.querySelectorAll('.product-template__tab-content');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const tabName = this.dataset.tab;
+        
+        // Deactivate all tabs
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Activate current tab
+        this.classList.add('active');
+        document.querySelector(`.product-template__tab-content[data-tab-content="${tabName}"]`).classList.add('active');
+      });
+    });
+    
+    // Thumbnail gallery
+    const thumbnails = document.querySelectorAll('.product-template__thumbnail');
+    const mainImage = document.querySelector('[data-main-image]');
+    
+    if (thumbnails.length && mainImage) {
+      thumbnails.forEach(thumbnail => {
+        thumbnail.addEventListener('click', function() {
+          const mediaId = this.dataset.thumbnailId;
+          const mediaItem = document.querySelector(`.product-template__media-item[data-media-id="${mediaId}"]`);
+          
+          if (mediaItem) {
+            const image = mediaItem.querySelector('img');
+            if (image) {
+              mainImage.src = image.src;
+              mainImage.alt = image.alt;
+            }
+          }
+        });
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "default": true,
+      "label": "Show description"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_buy_now",
+      "default": true,
+      "label": "Show buy now button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_share_buttons",
+      "default": true,
+      "label": "Show share buttons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tabs",
+      "default": true,
+      "label": "Show tabs section"
+    },
+    {
+      "type": "richtext",
+      "id": "shipping_text",
+      "label": "Shipping information",
+      "default": "<p>Our standard shipping takes 3-5 business days. Express shipping is available at checkout.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Related products"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_related_products",
+      "default": true,
+      "label": "Show related products"
+    },
+    {
+      "type": "text",
+      "id": "related_products_title",
+      "default": "You may also like",
+      "label": "Related products title"
+    },
+    {
+      "type": "range",
+      "id": "related_products_count",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4,
+      "label": "Number of related products"
+    }
+  ]
+}
+{% endschema %}
