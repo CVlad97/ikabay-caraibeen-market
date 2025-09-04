@@ -1,250 +1,113 @@
-// Ikabay — Ingest Netlify site → enhance → Stripe links → deploy (Netlify)
-// Gratuit, autonome, reprend via AGENT_STATE.json
+// Génère index.html + styles.css + products.json (Airtable si dispo) et déploie sur Netlify.
+// Logs ultra-clairs + WhatsApp prérempli + échec seulement si déploiement Netlify échoue AVEC creds fournis.
+const fs=require('fs'),path=require('path'),axios=require('axios');
+const out=p=>path.join(process.cwd(),p), w=(p,c)=>fs.writeFileSync(out(p),c), ex=p=>fs.existsSync(out(p));
 
-import fs from "fs";
-import path from "path";
-import axios from "axios";
-import cheerio from "cheerio";
-import { execSync } from "child_process";
+const WA=(process.env.WHATSAPP_NUMBER||'+596696000000').replace('+','');
+const STRIPE={iphone:process.env.STRIPE_IPHONE||'',scooter:process.env.STRIPE_SCOOTER||'',jewel:process.env.STRIPE_JEWEL||''};
+const HAS_NETLIFY = !!(process.env.NETLIFY_AUTH_TOKEN && process.env.NETLIFY_SITE_ID);
 
-const SOURCE_URL = process.env.SOURCE_URL; // Netlify fourni
-const STRIPE_API_KEY = process.env.STRIPE_API_KEY || "";
-const NETLIFY_AUTH_TOKEN = process.env.NETLIFY_AUTH_TOKEN || "";
-const NETLIFY_SITE_ID = process.env.NETLIFY_SITE_ID || "";
+const html = () => `<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IKABAY - Marketplace Caribéenne | DOM-TOM</title>
+<link rel="stylesheet" href="styles.css"></head><body>
+<header class="hero"><h1>🏝️ IKABAY</h1><p>Marketplace Caribéenne</p></header>
+<section class="offers"><h2>🔥 OFFRES FLASH -50%</h2><div class="grid">
+${[
+  {k:'iphone',n:'iPhone 15 Pro',old:1200,new:600},
+  {k:'scooter',n:'Scooter Électrique 60km',old:800,new:400},
+  {k:'jewel',n:'Bijoux Or 18k',old:500,new:250},
+].map(o=>`<div class="card"><h3>${o.n}</h3><p><s>${o.old}€</s> <b>${o.new}€</b></p>
+<p>
+  <a class="btn" href="https://wa.me/${WA}?text=${encodeURIComponent('Bonjour ! Je veux commander ' + o.n + ' à ' + o.new + '€')}" target="_blank">WhatsApp</a>
+  ${STRIPE[o.k]?`<a class="btn pay" href="${STRIPE[o.k]}" target="_blank">Payer</a>`:''}
+</p></div>`).join('')}
+</div></section>
+<section><h2>🏪 Produits Locaux & Import</h2><div id="products"></div></section>
+<script>
+fetch('products.json').then(r=>r.json()).then(list=>{
+  document.getElementById('products').innerHTML=list.map(p=>\`<div class="card"><img src="\${p.image}" alt=""><h4>\${p.name}</h4><p>\${p.price}€ • \${p.category} • \${p.origin_type}</p></div>\`).join('');
+}).catch(()=>{});
+</script></body></html>`;
 
-const STATE_FILE = "AGENT_STATE.json";
-const log = (...a) => console.log("IKABAY>", ...a);
+const css = `body{font-family:system-ui,Arial;background:#f6f7fb;margin:0}
+.hero{padding:48px;text-align:center;background:linear-gradient(135deg,#14b8a6,#f97316);color:#fff}
+.offers{padding:32px;background:#fff;margin:24px;border-radius:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:16px}
+.card img{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+.btn{display:inline-block;margin-top:8px;margin-right:8px;padding:8px 12px;border-radius:8px;background:#0ea5e9;color:#fff;text-decoration:none}
+.btn.pay{background:#10b981}`;
 
-const writeFile = (file, content) => {
-  const dir = path.dirname(file);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(file, content);
-};
-const fileExists = (f) => fs.existsSync(f);
+(async()=>{
+  try{
+    console.log('== IKABAY AGENT ==');
+    console.log('WhatsApp:', WA ? 'present' : 'missing');
+    console.log('Stripe links:', Object.keys(STRIPE).map(k=>STRIPE[k]?'✓':'-').join(' '));
+    console.log('Netlify creds:', HAS_NETLIFY ? 'present' : 'missing');
 
-function saveState(next, extra={}) {
-  fs.writeFileSync(STATE_FILE, JSON.stringify({ next_step: next, timestamp:new Date().toISOString(), ...extra }, null, 2));
-}
-function loadState() {
-  if (fileExists(STATE_FILE)) return JSON.parse(fs.readFileSync(STATE_FILE, "utf8"));
-  return null;
-}
+    if(!ex('index.html')) w('index.html', html());
+    if(!ex('styles.css')) w('styles.css', css);
 
-async function httpGet(url, type="text") {
-  const res = await axios.get(url, { responseType: type === "binary" ? "arraybuffer" : "text", timeout: 20000 });
-  return res.data;
-}
-name: Ikabay Netlify Agent (Free, Auto-resume)
-
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "*/30 * * * *"   # toutes les 30 min (évite le rate limit)
-
-permissions:
-  contents: write
-
-jobs:
-  run-agent:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install deps
-        run: |
-          npm i
-
-      - name: Run agent (generate + deploy)
-        env:
-          WHATSAPP_NUMBER: ${{ secrets.WHATSAPP_NUMBER }}
-          STRIPE_IPHONE: ${{ secrets.STRIPE_IPHONE }}
-          STRIPE_SCOOTER: ${{ secrets.STRIPE_SCOOTER }}
-          STRIPE_JEWEL: ${{ secrets.STRIPE_JEWEL }}
-          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
-          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
-          AIRTABLE_TABLE: ${{ secrets.AIRTABLE_TABLE }}
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        run: node scripts/ingest-from-netlify.js
-
-      - name: Commit state & json
-        run: |
-          git config user.name "ikabay-agent"
-          git config user.email "agent@ikabay.store"
-          git add -A
-          git commit -m "chore(agent): site sync + products + state" || echo "no changes"
-          git push || true
-
-async function createPaymentLink(name, amountEUR) {
-  if (!STRIPE_API_KEY) return "#";
-  const body = new URLSearchParams();
-  body.append("line_items[0][price_data][currency]", "eur");
-  body.append("line_items[0][price_data][product_data][name]", name);
-  body.append("line_items[0][price_data][unit_amount]", String(amountEUR * 100));
-  body.append("line_items[0][quantity]", "1");
-  const res = await axios.post("https://api.stripe.com/v1/payment_links", body, {
-    headers: { Authorization: `Bearer ${STRIPE_API_KEY}`, "Content-Type": "application/x-www-form-urlencoded" }
-  });
-  return res.data.url;
-}
-
-function git(cmd) { execSync(cmd, { stdio:"inherit" }); }
-function commit(msg) {
-  try { git('git config user.name "ikabay-agent"'); } catch {}
-  try { git('git config user.email "bot@ikabay.local"'); } catch {}
-  git("git add -A");
-  try { git(`git commit -m "${msg}"`); } catch {}
-  try { git("git push"); } catch {}
-}
-
-async function ingestSource() {
-  log("Chargement page source…", SOURCE_URL);
-  const html = await httpGet(SOURCE_URL, "text");
-  writeFile("source/index.raw.html", html);
-
-  // Parse ressources statiques
-  const $ = cheerio.load(html);
-  const assets = new Set();
-  $('link[href]').each((_,el)=>assets.add(new URL($(el).attr("href"), SOURCE_URL).href));
-  $('script[src]').each((_,el)=>assets.add(new URL($(el).attr("src"), SOURCE_URL).href));
-  $('img[src]').each((_,el)=>assets.add(new URL($(el).attr("src"), SOURCE_URL).href));
-
-  // Sauvegarde minimale
-  writeFile("index.html", html); // remplacé ensuite par la landing Ikabay
-  for (const url of assets) {
-    try {
-      const data = await httpGet(url, "binary");
-      const rel = url.replace(/^https?:\/\/[^/]+/, "");
-      const out = rel.startsWith("/") ? rel.slice(1) : rel;
-      writeFile(out, data);
-    } catch {}
-  }
-}
-
-function landingTemplate({ iphone="#", scooter="#", bijoux="#"} = {}) {
-  return `<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Ikabay — Marketplace DOM-TOM</title>
-<link rel="stylesheet" href="styles.css"/>
-<script defer src="app.js"></script>
-<script defer src="translations.js"></script>
-</head>
-<body>
-<header class="container">
-  <h1>🏝️ Ikabay</h1>
-  <p data-translate="hero_subtitle">Livraison mutualisée DOM-TOM | Objectif: 10 000€ cette semaine</p>
-</header>
-
-<main class="container">
-  <section>
-    <h2 data-translate="flash_title">🔥 OFFRES FLASH 24H — STOCK LIMITÉ</h2>
-    <div class="offers">
-      <article class="offer-card" data-product="iphone">
-        <h3 data-translate="iphone_title">iPhone 15</h3>
-        <p><span class="old">1200€</span> <strong>600€</strong></p>
-        <a class="btn-buy" href="\${iphone}" target="_blank" rel="noopener">🛒 Acheter</a>
-      </article>
-      <article class="offer-card" data-product="scooter">
-        <h3 data-translate="scooter_title">Scooter Électrique 60km</h3>
-        <p><span class="old">800€</span> <strong>400€</strong></p>
-        <a class="btn-buy" href="\${scooter}" target="_blank" rel="noopener">🛒 Acheter</a>
-      </article>
-      <article class="offer-card" data-product="bijoux">
-        <h3 data-translate="bijoux_title">Bijoux Or 18k</h3>
-        <p><span class="old">2500€</span> <strong>1250€</strong></p>
-        <a class="btn-buy" href="\${bijoux}" target="_blank" rel="noopener">🛒 Acheter</a>
-      </article>
-    </div>
-  </section>
-</main>
-
-<footer class="container"><small>© Ikabay — Marketplace autonome DOM-TOM</small></footer>
-</body>
-</html>`;
-}
-
-function ensureBaseAssets() {
-  if (!fileExists("styles.css")) {
-    writeFile("styles.css",
-      `*{box-sizing:border-box}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:#f7f8fb;margin:0;color:#222}
-header,main,footer{padding:16px}.container{max-width:980px;margin:auto}
-h1{margin:.2rem 0}.offers{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.offer-card{background:#fff;padding:16px;border-radius:12px;border:1px solid #eee}
-.old{text-decoration:line-through;opacity:.6;margin-right:8px}.btn-buy{display:inline-block;margin-top:8px;background:#ff6b35;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none}`
-    );
-  }
-  if (!fileExists("app.js")) {
-    writeFile("app.js", `console.log("Ikabay live");`);
-  }
-  if (!fileExists("translations.js")) {
-    writeFile("translations.js", `window.translations={applyLanguage:()=>{}};`);
-  }
-}
-
-async function createOrReuseStripeLinks() {
-  let iphone="#", scooter="#", bijoux="#";
-  try {
-    if (STRIPE_API_KEY) {
-      iphone = await createPaymentLink("iPhone 15 (-50%)", 600);
-      scooter = await createPaymentLink("Scooter électrique 60km (-50%)", 400);
-      bijoux = await createPaymentLink("Bijoux Or 18k (-50%)", 1250);
+    // Airtable → products.json (tolère nom de table OU ID tblxxxxx)
+    let products=null,{AIRTABLE_API_KEY,AIRTABLE_BASE_ID,AIRTABLE_TABLE}=process.env;
+    if(AIRTABLE_API_KEY&&AIRTABLE_BASE_ID&&AIRTABLE_TABLE){
+      try{
+        const url=`https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${encodeURIComponent(AIRTABLE_TABLE)}?pageSize=24`;
+        console.log('Fetching Airtable:', url.replace(AIRTABLE_BASE_ID,'<base>').replace(encodeURIComponent(AIRTABLE_TABLE),'<table>'));
+        const r=await axios.get(url,{headers:{Authorization:`Bearer ${AIRTABLE_API_KEY}`}});
+        products=(r.data.records||[]).map(x=>{
+          const f=x.fields||{}, s=(f.supplier||'').toString().toLowerCase();
+          const origin=['martinique','guadeloupe','guyane','dom','antilles','caribbean','local'].some(k=>s.includes(k))?'local':'import';
+          const img=Array.isArray(f.image)?(f.image[0]?.url):f.image;
+          return {name:f.name||'Produit',price:+(f.price||0),image:img||'https://via.placeholder.com/400x300?text=IKABAY',category:f.category||'Général',sku:f.sku||x.id,stock:+(f.stock||0),origin_type:origin};
+        });
+        console.log(`Airtable OK: ${products.length} produits`);
+      }catch(e){
+        console.warn('Airtable KO → fallback demo.', e?.response?.status || e.message);
+      }
     }
-  } catch (e) {
-    console.warn("Stripe non configuré ou erreur → CTA désactivés (#).", e.response?.data || e.message);
-  }
-  return { iphone, scooter, bijoux };
-}
+    if(!products)products=[
+      {name:'Sirop de canne local',price:8,image:'https://via.placeholder.com/400x300?text=Local',category:'Gourmand',sku:'LOC-001',stock:50,origin_type:'local'},
+      {name:'Punch coco artisanal',price:14,image:'https://via.placeholder.com/400x300?text=Local',category:'Boisson',sku:'LOC-002',stock:30,origin_type:'local'},
+      {name:'Madras premium',price:29,image:'https://via.placeholder.com/400x300?text=Local',category:'Textile',sku:'LOC-003',stock:20,origin_type:'local'},
+      {name:'iPhone 15 Pro',price:600,image:'https://via.placeholder.com/400x300?text=iPhone+15',category:'High-Tech',sku:'IMP-IPH15',stock:5,origin_type:'import'},
+      {name:'Scooter électrique 60km',price:400,image:'https://via.placeholder.com/400x300?text=Scooter',category:'Mobilité',sku:'IMP-SCOOT',stock:7,origin_type:'import'},
+      {name:'Bijoux Or 18k',price:250,image:'https://via.placeholder.com/400x300?text=Or+18k',category:'Luxe',sku:'IMP-GOLD',stock:12,origin_type:'import'}
+    ];
+    w('products.json',JSON.stringify(products,null,2));
 
-async function deployNetlify() {
-  if (!NETLIFY_AUTH_TOKEN || !NETLIFY_SITE_ID) {
-    log("Netlify secrets manquants → déploiement automatique désactivé.");
-    return;
-  }
-  execSync(`npx netlify deploy --prod --dir=. --site=${NETLIFY_SITE_ID} --auth=${NETLIFY_AUTH_TOKEN}`, { stdio:"inherit" });
-}
-
-(async () => {
-  try {
-    const state = loadState();
-    const next = state?.next_step || "STEP_1";
-    log("Étape:", next);
-    if (!SOURCE_URL) throw new Error("SOURCE_URL manquant.");
-
-    if (next === "STEP_1") {
-      await ingestSource();
-      ensureBaseAssets();
-      saveState("STEP_2", { note:"Source ingérée + assets base OK" });
-      commit("chore(ikabay): ingest source + base assets");
-      return;
+    // Déploiement Netlify
+    if(HAS_NETLIFY){
+      try{
+        console.log('Deploying to Netlify PROD…');
+        require('child_process').execSync(
+          `npx netlify-cli@17 deploy --dir . --prod --site ${process.env.NETLIFY_SITE_ID}`,
+          {stdio:'inherit'}
+        );
+        console.log('Netlify deploy: OK');
+      }catch(e){
+        console.error('Netlify deploy FAILED. Vérifie NETLIFY_AUTH_TOKEN (Personal Access Token) et NETLIFY_SITE_ID.');
+        throw e; // fait échouer le job si les creds sont là mais déploiement échoue
+      }
+    }else{
+      console.warn('NETLIFY creds absents → pas de déploiement (fichiers générés/commit quand même).');
     }
 
-    if (next === "STEP_2") {
-      const links = await createOrReuseStripeLinks();
-      const html = landingTemplate(links);
-      writeFile("index.html", html);
-      saveState("STEP_3", { links });
-      commit("feat(ikabay): landing + Stripe Payment Links");
-      return;
-    }
+    // State
+    w('AGENT_STATE.json',JSON.stringify({
+      ts:new Date().toISOString(),
+      products:products.length,
+      whatsapp:`+${WA}`,
+      stripe:{
+        iphone:!!STRIPE.iphone, scooter:!!STRIPE.scooter, jewel:!!STRIPE.jewel
+      },
+      netlify: HAS_NETLIFY ? 'attempted' : 'skipped'
+    },null,2));
 
-    if (next === "STEP_3") {
-      await deployNetlify();
-      saveState("DONE", { deployed_on:"netlify" });
-      commit("chore(ikabay): deploy to Netlify (prod)");
-      log("SITE LIVE ✓ — Netlify publie ton répertoire. Vérifie l’URL Netlify de ton site.");
-      return;
-    }
-
-    log("Déjà DONE.");
-  } catch (e) {
-    console.error("❌ ERREUR:", e.response?.data || e.message || e);
-    // Le cron relancera dans 10 min et reprendra grâce à AGENT_STATE.json
+    console.log('Done.');
+  }catch(e){
+    console.error(e);
+    process.exit(1);
   }
 })();
