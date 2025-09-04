@@ -3,7 +3,7 @@ name: Ikabay Netlify Agent (Free, Auto-resume)
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/30 * * * *"   # toutes les 30 min
+    - cron: "*/30 * * * *"
 
 permissions:
   contents: write
@@ -19,11 +19,6 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Prepare deps (axios + netlify-cli), even without package.json
-        run: |
-          if [ ! -f package.json ]; then npm init -y; fi
-          npm i axios@^1.7.2 netlify-cli@^17.31.1
-
       - name: Sanity checks
         run: |
           set -e
@@ -31,9 +26,9 @@ jobs:
           npm -v
           npx netlify --version
           test -f scripts/ingest-from-netlify.js || { echo "::error :: scripts/ingest-from-netlify.js is missing"; exit 1; }
-          echo "Secrets presence (values masked):"
+          echo "Secrets:"
           [ -n "${{ secrets.NETLIFY_SITE_ID }}" ] && echo "NETLIFY_SITE_ID ✓" || echo "::warning :: NETLIFY_SITE_ID missing"
-          [ -n "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] && echo "NETLIFY_AUTH_TOKEN ✓ (must be Personal Access Token)" || echo "::warning :: NETLIFY_AUTH_TOKEN missing"
+          [ -n "${{ secrets.NETLIFY_AUTH_TOKEN }}" ] && echo "NETLIFY_AUTH_TOKEN ✓ (Personal Access Token)" || echo "::warning :: NETLIFY_AUTH_TOKEN missing"
           [ -n "${{ secrets.WHATSAPP_NUMBER }}" ] && echo "WHATSAPP_NUMBER ✓" || echo "::warning :: WHATSAPP_NUMBER missing"
 
       - name: Run agent (generate + deploy)
