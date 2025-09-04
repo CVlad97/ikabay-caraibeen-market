@@ -34,6 +34,51 @@ async function httpGet(url, type="text") {
   const res = await axios.get(url, { responseType: type === "binary" ? "arraybuffer" : "text", timeout: 20000 });
   return res.data;
 }
+name: Ikabay Netlify Agent (Free, Auto-resume)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"   # toutes les 30 min (évite le rate limit)
+
+permissions:
+  contents: write
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps
+        run: |
+          npm i
+
+      - name: Run agent (generate + deploy)
+        env:
+          WHATSAPP_NUMBER: ${{ secrets.WHATSAPP_NUMBER }}
+          STRIPE_IPHONE: ${{ secrets.STRIPE_IPHONE }}
+          STRIPE_SCOOTER: ${{ secrets.STRIPE_SCOOTER }}
+          STRIPE_JEWEL: ${{ secrets.STRIPE_JEWEL }}
+          AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+          AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+          AIRTABLE_TABLE: ${{ secrets.AIRTABLE_TABLE }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: node scripts/ingest-from-netlify.js
+
+      - name: Commit state & json
+        run: |
+          git config user.name "ikabay-agent"
+          git config user.email "agent@ikabay.store"
+          git add -A
+          git commit -m "chore(agent): site sync + products + state" || echo "no changes"
+          git push || true
 
 async function createPaymentLink(name, amountEUR) {
   if (!STRIPE_API_KEY) return "#";
