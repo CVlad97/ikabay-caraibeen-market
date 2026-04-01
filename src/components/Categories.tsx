@@ -71,7 +71,7 @@ const categories = [
 
 export function Categories() {
   return (
-    <section className="py-16 bg-muted/30">
+    <section id="categories" className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -118,15 +118,16 @@ export function Categories() {
 
         {/* Featured Banner */}
         <div className="mt-16 bg-gradient-hero rounded-2xl p-8 text-center text-white shadow-caribbean">
-          <h3 className="text-2xl font-bold mb-4">
-            🌴 Spécial Artisans Locaux
-          </h3>
+          <h3 className="text-2xl font-bold mb-4">Special artisans locaux</h3>
           <p className="text-lg mb-6 opacity-90">
-            Soutenez l'économie locale ! Chaque achat aide nos artisans créoles.
+            Priorite aux categories simples a vendre vite: gastronomie, cadeaux, artisanat et rhums.
           </p>
-          <button className="bg-white text-primary px-8 py-3 rounded-lg font-semibold hover:bg-opacity-90 transition-all duration-300 hover:scale-105">
-            Découvrir nos Artisans
-          </button>
+          <a
+            href="#vendeurs"
+            className="inline-flex items-center justify-center rounded-lg bg-white px-8 py-3 font-semibold text-primary transition-all duration-300 hover:scale-105 hover:bg-opacity-90"
+          >
+            Voir l'offre vendeur
+          </a>
         </div>
       </div>
     </section>

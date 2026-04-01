@@ -92,7 +92,7 @@ const products = [
 
 export function ProductGrid() {
   return (
-    <section className="py-16 bg-background">
+    <section id="catalogue" className="py-16 bg-background">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -100,8 +100,7 @@ export function ProductGrid() {
             Produits Populaires
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Découvrez notre sélection de produits authentiques des Antilles, 
-            choisis avec soin par nos artisans et producteurs locaux.
+            Demarre avec une selection courte et claire. Le but est de convertir vite, pas d'afficher tout le catalogue.
           </p>
         </div>
 
@@ -116,9 +115,12 @@ export function ProductGrid() {
 
         {/* Load More Button */}
         <div className="text-center mt-12">
-          <button className="bg-gradient-ocean text-white px-8 py-4 rounded-lg font-semibold hover:shadow-caribbean transition-all duration-300 hover:scale-105">
-            Voir Plus de Produits
-          </button>
+          <a
+            href="#vendeurs"
+            className="inline-flex items-center justify-center rounded-lg bg-gradient-ocean px-8 py-4 font-semibold text-white transition-all duration-300 hover:scale-105 hover:shadow-caribbean"
+          >
+            Ajouter une offre locale
+          </a>
         </div>
       </div>
     </section>
