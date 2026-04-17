@@ -1,85 +1,103 @@
-import { Search, ShoppingCart, User, Menu, Globe } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { ArrowRight, FileText, Menu, MessageCircle, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+
+const whatsappHref =
+  "https://wa.me/596696905164?text=Bonjour%2C%20je%20souhaite%20recevoir%20la%20liste%20du%20d%C3%A9stockage%20nautique%20Ikabay.";
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border shadow-soft">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 shadow-soft backdrop-blur supports-[backdrop-filter]:bg-background/70">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center space-x-4">
+        <div className="flex min-h-16 items-center justify-between gap-4 py-3">
+          <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-ocean rounded-lg flex items-center justify-center">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-ocean">
                 <span className="text-white font-bold text-sm">IK</span>
               </div>
-              <span className="font-bold text-xl bg-gradient-hero bg-clip-text text-transparent">
-                Ikabay Caraïbeen
-              </span>
-            </div>
+              <div>
+                <p className="bg-gradient-hero bg-clip-text text-lg font-bold text-transparent md:text-xl">
+                  Ikabay Destok 972
+                </p>
+                <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
+                  Martinique / Caraibes
+                </p>
+              </div>
+            </Link>
+            <Badge className="hidden bg-accent text-accent-foreground lg:inline-flex">
+              PDF reel
+            </Badge>
           </div>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input 
-                placeholder="Rechercher des produits caribéens..."
-                className="pl-10 pr-4 h-10 bg-card border-border focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
+          <nav className="hidden items-center gap-2 lg:flex">
+            <Link
+              to="/"
+              className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary/40 hover:bg-muted"
+            >
+              Accueil demo
+            </Link>
+            <Link
+              to="/destockage-nautique"
+              className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary/40 hover:bg-muted"
+            >
+              Catalogue nautique
+            </Link>
+            <a
+              href="#vendeurs"
+              className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary/40 hover:bg-muted"
+            >
+              Vente rapide
+            </a>
+          </nav>
 
-          {/* Navigation Actions */}
-          <div className="flex items-center space-x-2">
-            {/* Language Selector */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="hidden sm:flex">
-                  <Globe className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>🇫🇷 Français</DropdownMenuItem>
-                <DropdownMenuItem>🇬🇧 English</DropdownMenuItem>
-                <DropdownMenuItem>🏝️ Kreyòl</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* User Account */}
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+          <div className="flex items-center gap-2">
+            <Button asChild variant="outline" className="hidden md:inline-flex">
+              <a href="tel:+596696905164">
+                <Phone className="mr-2 h-4 w-4" />
+                Appeler
+              </a>
             </Button>
-
-            {/* Shopping Cart */}
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center bg-accent text-accent-foreground text-xs rounded-full">
-                3
-              </Badge>
+            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent-hover">
+              <a href={whatsappHref} target="_blank" rel="noreferrer">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                WhatsApp
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
             </Button>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="md:hidden pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input 
-              placeholder="Rechercher..."
-              className="pl-10 pr-4 h-10 bg-card border-border"
-            />
-          </div>
+        <div className="flex flex-wrap gap-2 pb-4 lg:hidden">
+          <Link
+            to="/destockage-nautique"
+            className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground"
+          >
+            Catalogue nautique
+          </Link>
+          <a
+            href="#vendeurs"
+            className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground"
+          >
+            Vente rapide
+          </a>
+          <a
+            href="tel:+596696905164"
+            className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground"
+          >
+            Appeler
+          </a>
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-full border border-accent bg-accent px-4 py-2 text-sm font-medium text-accent-foreground"
+          >
+            WhatsApp
+          </a>
         </div>
       </div>
     </header>
