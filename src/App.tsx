@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import ProductDetail from "./pages/ProductDetail";
+import NauticalDestocking from "./pages/NauticalDestocking";
 
 const queryClient = new QueryClient();
 
@@ -16,13 +17,13 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/compte" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/produits/:id" element={<ProductDetail />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/destockage-nautique" element={<NauticalDestocking />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
