@@ -1,73 +1,74 @@
-# Welcome to your Lovable project
+# IKABAY — lancement MVP Martinique-first
 
-## Project info
+IKABAY est actuellement resserré autour d'un lancement concret : **déstockage, sourcing et réservation rapide pour la Martinique / DOM**, avec conversion par WhatsApp.
 
-**URL**: https://lovable.dev/projects/3ae3fac0-a20c-4505-ad6c-8da0728c63b9
+Le périmètre public réellement montrable aujourd'hui est la démo **Ikabay Destok 972 — déstockage nautique** basée sur un inventaire PDF réel.
 
-## How can I edit this code?
+## Ce qui est réel maintenant
 
-There are several ways of editing your application.
+- Page d'accueil orientée démo commerciale.
+- Page `/destockage-nautique` avec produits issus de l'inventaire réel.
+- Top 12 produits exploitables : stock > 0, prix présent, référence claire.
+- Top 24 préparé dans la source de données.
+- Messages WhatsApp, Facebook, Instagram et LinkedIn générés par produit.
+- CTA de réservation rapide via WhatsApp.
+- Build statique compatible GitHub Pages.
 
-**Use Lovable**
+## Ce qui n'est pas encore une promesse publique
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3ae3fac0-a20c-4505-ad6c-8da0728c63b9) and start prompting.
+- Paiement en ligne complet.
+- Marketplace multi-vendeurs automatisée.
+- Livraison DHL/TTOM branchée en production.
+- Token, mining, NFT, DeFi ou récompenses crypto.
+- Admin production complet.
+- Tracking logistique automatique.
 
-Changes made via Lovable will be committed automatically to this repo.
+Ces sujets restent en backlog tant que le flux simple `produit -> WhatsApp -> réservation -> confirmation -> retrait/expédition` n'a pas généré de ventes réelles.
 
-**Use your preferred IDE**
+## Parcours MVP
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Le client ouvre la page déstockage.
+2. Il identifie une référence, un prix et un stock.
+3. Il clique sur WhatsApp / Réserver.
+4. Le message contient la référence et la demande de disponibilité.
+5. L'opérateur confirme stock, retrait local ou expédition.
+6. La vente est suivie manuellement au départ.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Routes principales
 
-Follow these steps:
+- `/` : façade commerciale Ikabay Destok 972.
+- `/destockage-nautique` : catalogue déstockage nautique.
+- `/produits/:id` : route Supabase existante, non prioritaire pour le lancement public.
+- `/compte` et `/admin` : routes Supabase/auth existantes, à valider avant usage production.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Variables d'environnement
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+| Variable | Usage |
+|---|---|
+| `VITE_BASE_PATH` | Base path GitHub Pages, ex: `/ikabay-caraibeen-market/` |
+| `VITE_SUPABASE_URL` | Requis seulement pour routes Supabase/auth/admin |
+| `VITE_SUPABASE_ANON_KEY` | Requis seulement pour routes Supabase/auth/admin |
 
-# Step 3: Install the necessary dependencies.
-npm i
+La page publique de déstockage nautique ne dépend pas de Supabase.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## Commandes
+
+```bash
+npm install
 npm run dev
+npm run build
+npm run preview
 ```
 
-**Edit a file directly in GitHub**
+## Validation avant publication
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- `npm run build` doit passer.
+- `/destockage-nautique` doit afficher les produits réels.
+- Les CTA WhatsApp doivent ouvrir un message prérempli avec référence produit.
+- Aucun produit sans stock/prix/référence ne doit être dans la vitrine principale.
+- Les textes doivent rester orientés vente rapide, sans promesse technique non branchée.
 
-**Use GitHub Codespaces**
+## Documents d'exploitation
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/3ae3fac0-a20c-4505-ad6c-8da0728c63b9) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- `docs/IKABAY_LAUNCH_AUDIT.md` : audit KayGo vs IKABAY et plan MVP.
+- `docs/WORKFLOW_ANTI_BLOCAGE.md` : règle local -> GitHub -> Pages -> validation publique.
