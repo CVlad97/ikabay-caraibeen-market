@@ -95,7 +95,7 @@ const ProductDetail = () => {
     if (!product) return;
 
     // Get or create cart
-    let { data: cart } = await supabase
+    const { data: cart } = await supabase
       .from('shopping_carts')
       .select('*')
       .eq('user_id', user.id)
@@ -129,13 +129,16 @@ const ProductDetail = () => {
       }
     } else {
       // Update existing cart
-      const existingItems = Array.isArray(cart.cart_items) ? cart.cart_items : [];
-      const existingItemIndex = existingItems.findIndex((item: any) => item.id === product.id);
+      const existingItems: CartItem[] = Array.isArray(cart.cart_items) ? cart.cart_items as CartItem[] : [];
+      const existingItemIndex = existingItems.findIndex((item) => item.id === product.id);
 
-      let updatedItems;
+      let updatedItems: CartItem[];
       if (existingItemIndex >= 0) {
         updatedItems = [...existingItems];
-        (updatedItems[existingItemIndex] as any).quantity += quantity;
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + quantity,
+        };
       } else {
         updatedItems = [...existingItems, cartItem];
       }
