@@ -90,10 +90,10 @@ const Index = () => {
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-                  <a href={whatsappHref} target="_blank" rel="noreferrer">
-                    <MessageCircle className="mr-2 h-5 w-5" />
-                    WhatsApp rapide
-                  </a>
+                  <Link to="/strategies">
+                    Voir les stratégies prudentes
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -113,7 +113,7 @@ const Index = () => {
                 <div className="space-y-3 text-sm leading-7 text-white/84">
                   <p>Stock réel uniquement. Pas de ligne inventée.</p>
                   <p>Démo pensée pour Martinique, retrait local et conversion rapide.</p>
-                  <p>Page déstockage + messages réseaux + WhatsApp déjà en place.</p>
+                  <p>Les stratégies affichées restent prudentes et sans promesse de gain.</p>
                 </div>
               </CardContent>
             </Card>

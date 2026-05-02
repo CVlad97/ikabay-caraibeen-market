@@ -64,6 +64,12 @@ export function Footer() {
               >
                 Catalogue
               </Link>
+              <Link
+                to="/strategies"
+                className="rounded-full bg-white/10 px-4 py-2 transition hover:bg-accent hover:text-accent-foreground"
+              >
+                Stratégies
+              </Link>
             </div>
           </div>
 

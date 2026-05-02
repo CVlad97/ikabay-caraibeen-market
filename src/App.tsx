@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import ProductDetail from "./pages/ProductDetail";
 import NauticalDestocking from "./pages/NauticalDestocking";
+import Strategies from "./pages/Strategies";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/produits/:id" element={<ProductDetail />} />
           <Route path="/destockage-nautique" element={<NauticalDestocking />} />
+          <Route path="/strategies" element={<Strategies />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
