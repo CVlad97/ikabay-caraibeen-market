@@ -1,4 +1,5 @@
 import { ArrowRight, FileText, MessageCircle, Package, Phone, ShieldCheck, Truck, Waves } from "lucide-react";
+import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -56,6 +57,102 @@ const processSteps = [
 
 const featuredProducts = nauticalDestockingProducts.slice(0, 6);
 const featuredCategories = nauticalDestockingCategories.slice(0, 6);
+
+type LeadFormState = {
+  name: string;
+  contact: string;
+  need: string;
+  product: string;
+  commune: string;
+};
+
+const initialLeadForm: LeadFormState = {
+  name: "",
+  contact: "",
+  need: "Réserver une référence",
+  product: "",
+  commune: "",
+};
+
+function LeadCaptureSection() {
+  const [lead, setLead] = useState<LeadFormState>(initialLeadForm);
+  const [saved, setSaved] = useState(false);
+
+  const updateLead = (field: keyof LeadFormState, value: string) => {
+    setLead((current) => ({ ...current, [field]: value }));
+  };
+
+  const buildMessage = () =>
+    [
+      "Bonjour Ikabay, je souhaite une réponse sur le déstockage nautique.",
+      `Nom : ${lead.name || "non renseigné"}`,
+      `Contact : ${lead.contact || "non renseigné"}`,
+      `Besoin : ${lead.need}`,
+      `Référence / produit : ${lead.product || "à préciser"}`,
+      `Commune : ${lead.commune || "non renseignée"}`,
+    ].join("\n");
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const entry = { ...lead, createdAt: new Date().toISOString() };
+    const current = JSON.parse(localStorage.getItem("ikabay_destok_leads") || "[]");
+    localStorage.setItem("ikabay_destok_leads", JSON.stringify([entry, ...current].slice(0, 80)));
+    setSaved(true);
+    window.open(`https://wa.me/596696905164?text=${encodeURIComponent(buildMessage())}`, "_blank", "noopener,noreferrer");
+  };
+
+  return (
+    <section id="lead-ikabay" className="border-y border-border bg-white py-16">
+      <div className="container mx-auto grid gap-8 px-4 lg:grid-cols-[0.88fr_1.12fr] lg:items-start">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary">Capture lead</p>
+          <h2 className="mt-3 text-4xl font-bold text-foreground">Transformer une visite en demande exploitable</h2>
+          <p className="mt-4 text-lg leading-8 text-muted-foreground">
+            Le client laisse son besoin, sa commune et une référence. La demande est gardée localement et WhatsApp s’ouvre avec un message propre.
+          </p>
+          <div className="mt-6 rounded-2xl border border-border bg-muted/40 p-4 text-sm leading-6 text-muted-foreground">
+            Version légère sans backend : utile pour démontrer, vendre vite et structurer le futur CRM Supabase.
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} className="grid gap-4 rounded-3xl border border-border bg-card p-6 shadow-soft">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm font-semibold text-foreground">
+              Nom
+              <input className="min-h-12 rounded-xl border border-border bg-background px-4 outline-none focus:border-primary" value={lead.name} onChange={(event) => updateLead("name", event.target.value)} placeholder="Nom ou société" />
+            </label>
+            <label className="grid gap-2 text-sm font-semibold text-foreground">
+              Contact
+              <input className="min-h-12 rounded-xl border border-border bg-background px-4 outline-none focus:border-primary" value={lead.contact} onChange={(event) => updateLead("contact", event.target.value)} placeholder="WhatsApp ou email" />
+            </label>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm font-semibold text-foreground">
+              Besoin
+              <select className="min-h-12 rounded-xl border border-border bg-background px-4 outline-none focus:border-primary" value={lead.need} onChange={(event) => updateLead("need", event.target.value)}>
+                <option>Réserver une référence</option>
+                <option>Recevoir la liste disponible</option>
+                <option>Demande de lot</option>
+                <option>Question livraison / retrait</option>
+              </select>
+            </label>
+            <label className="grid gap-2 text-sm font-semibold text-foreground">
+              Commune
+              <input className="min-h-12 rounded-xl border border-border bg-background px-4 outline-none focus:border-primary" value={lead.commune} onChange={(event) => updateLead("commune", event.target.value)} placeholder="Ex : Ducos, Fort-de-France" />
+            </label>
+          </div>
+          <label className="grid gap-2 text-sm font-semibold text-foreground">
+            Référence ou produit
+            <textarea className="min-h-28 rounded-xl border border-border bg-background px-4 py-3 outline-none focus:border-primary" value={lead.product} onChange={(event) => updateLead("product", event.target.value)} placeholder="Référence, produit recherché, quantité ou lien" />
+          </label>
+          <Button type="submit" className="bg-accent text-accent-foreground hover:bg-accent-hover">
+            Préparer WhatsApp et sauvegarder
+          </Button>
+          {saved && <p className="text-sm font-semibold text-secondary">Lead sauvegardé localement. WhatsApp est préparé.</p>}
+        </form>
+      </div>
+    </section>
+  );
+}
 
 const Index = () => {
   return (
@@ -270,6 +367,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <LeadCaptureSection />
 
       <section id="vendeurs" className="border-t border-border bg-muted/30 py-16">
         <div className="container mx-auto px-4">
